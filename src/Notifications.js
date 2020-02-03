@@ -63,6 +63,7 @@ export class NotificationContainer extends React.PureComponent<Props, State> {
           <Layer
             position="top-right"
             modal={false}
+            responsive={false}
             plain
             margin={{vertical: 'medium', horizontal: 'small'}}>
             {Object.keys(notifications).map(k => (
