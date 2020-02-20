@@ -70,6 +70,7 @@
     "@babel/preset-flow": "^7.0.0",
     "@dwwoelfel/relay-compiler": "5.0.1-alpha1",
     "babel-plugin-macros": "^2.6.1",
+    "firebase-deploy-directory": "^1.0.3",
     "firebase-tools": "7.2.4",
     "flow-bin": "^0.105.1",
     "netlify-cli": "^2.4.8",
