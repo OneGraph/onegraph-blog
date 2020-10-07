@@ -632,7 +632,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "PostsRoot_Query",
-    "id": "7331c192-2a17-4e25-88a4-ff03f7724bef",
+    "id": "e66841dd-fa9a-4921-8f7f-b0c1a22c7695",
     "text": null,
     "metadata": {}
   }
