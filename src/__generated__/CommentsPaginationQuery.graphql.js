@@ -558,7 +558,11 @@ return {
   "params": {
     "operationKind": "query",
     "name": "CommentsPaginationQuery",
+<<<<<<< HEAD
     "id": "6579c5ec-05d9-45cc-b135-f15c6b9661aa",
+=======
+    "id": "13424f4e-8b9c-43d5-ab1c-e4342b0b1661",
+>>>>>>> 0bd9760... s/changelog/blog
     "text": null,
     "metadata": {}
   }

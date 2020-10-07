@@ -7,12 +7,12 @@ RUN yarn install
 
 COPY . .
 
-ENV BASE_PATH="/changelog"
+ENV BASE_PATH="/blog"
 ENV NODE_ENV=production
 ARG gcp_project
 
 RUN yarn build && rm -rf .next/cache
-RUN yarn firebase-deploy-directory --project $gcp_project --subpath changelog/_next/static --directory .next/static/ --commit
+RUN yarn firebase-deploy-directory --project $gcp_project --subpath blog/_next/static --directory .next/static/ --commit
 
 # Make smaller prod image
 FROM node:14 as node_installer
@@ -26,7 +26,7 @@ RUN yarn install --production
 
 FROM node:14
 
-ENV BASE_PATH="/changelog"
+ENV BASE_PATH="/blog"
 ENV NODE_ENV=production
 
 COPY package.json .

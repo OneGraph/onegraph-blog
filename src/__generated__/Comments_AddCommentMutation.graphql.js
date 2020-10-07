@@ -422,7 +422,11 @@ return {
   "params": {
     "operationKind": "mutation",
     "name": "Comments_AddCommentMutation",
+<<<<<<< HEAD
     "id": "ef27d189-c8f4-4a92-b231-51b6d74efccd",
+=======
+    "id": "722fd120-72a1-41bc-aa3e-417bde6b8060",
+>>>>>>> 0bd9760... s/changelog/blog
     "text": null,
     "metadata": {}
   }

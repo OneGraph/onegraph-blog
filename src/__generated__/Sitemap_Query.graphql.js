@@ -297,7 +297,11 @@ return {
   "params": {
     "operationKind": "query",
     "name": "Sitemap_Query",
+<<<<<<< HEAD
     "id": "c9afa652-81cd-4fc4-b72d-db05c68621e6",
+=======
+    "id": "2b0bcc35-7b0b-47a3-88a0-cec738c7ae88",
+>>>>>>> 0bd9760... s/changelog/blog
     "text": null,
     "metadata": {}
   }

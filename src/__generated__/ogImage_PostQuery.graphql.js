@@ -343,7 +343,11 @@ return {
   "params": {
     "operationKind": "query",
     "name": "ogImage_PostQuery",
+<<<<<<< HEAD
     "id": "8939faac-c580-4c36-980d-27207900db26",
+=======
+    "id": "8a58911e-5d5c-4543-82e4-8becb61cd8d7",
+>>>>>>> 0bd9760... s/changelog/blog
     "text": null,
     "metadata": {}
   }
