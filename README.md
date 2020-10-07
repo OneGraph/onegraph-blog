@@ -8,6 +8,6 @@ What follows are implementation details specific to this repo. For setting up a 
 
 Staging triggers a build on [staging cloudbuild](https://console.cloud.google.com/cloud-build/builds?project=sourcecodeshots) on every push to non-master and deploys to staging firebase hosting/cloud run.
 
-Production triggers a build on (https://console.cloud.google.com/cloud-build/builds?project=onegraph-prod) on pushes to master and deploys to prod firebase hosting/cloud run.
+Production triggers a build on (https://console.cloud.google.com/cloud-build/builds?project=onegraph-dashboard) on pushes to master and deploys to prod firebase hosting/cloud run.
 
 Check the cloudbuild-staging.yaml, cloudbuild.yaml, and Dockerfile for implementation details.
