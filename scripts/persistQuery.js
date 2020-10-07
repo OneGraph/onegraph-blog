@@ -1,8 +1,10 @@
 const https = require('https');
+const path = require('path');
 const GraphQLLanguage = require('graphql/language');
 const {parse, print} = require('graphql');
 
 require('dotenv').config();
+require('dotenv').config({path: path.resolve(process.cwd(), '.env.local')});
 
 if (
   (!process.env.REPOSITORY_FIXED_VARIABLES &&

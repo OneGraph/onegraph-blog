@@ -618,7 +618,7 @@ export const Post = ({relay, post, context}: Props) => {
         ) : null}
       </Head>
       <Box pad="medium">
-        <Heading level={1} margin="none">
+        <Heading level={2} margin="none">
           {context === 'details' ? (
             post.title
           ) : (

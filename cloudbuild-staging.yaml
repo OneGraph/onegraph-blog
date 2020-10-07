@@ -1,0 +1,20 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build',
+           '--network=cloudbuild',
+            '--build-arg', 'gcp_project=oph-dashboard-staging',
+            '-t', 'gcr.io/oph-dashboard-staging/changelog', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/oph-dashboard-staging/changelog']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['run', 'deploy', 'changelog',
+           '--image', 'gcr.io/oph-dashboard-staging/changelog',
+           '--region', 'us-central1',
+           '--platform', 'managed',
+           '--concurrency', '80',
+           '--max-instances', '100',
+           '--timeout', '5m',
+           '--memory', '512Mi']
+images: ['gcr.io/oph-dashboard-staging/changelog']
+timeout: '20m'

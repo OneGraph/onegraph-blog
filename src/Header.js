@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
-import {Box, Heading} from 'grommet';
+import {Box, Heading, Text} from 'grommet';
 import Avatar from './Avatar';
 import Link from 'next/link';
 import ConfigContext from './ConfigContext';
@@ -16,21 +16,19 @@ function Header({gitHub, adminLinks}) {
       <Box margin="medium" style={{position: 'absolute', top: 0, right: 0}}>
         <Avatar gitHub={gitHub} adminLinks={adminLinks} />
       </Box>
-      <Box
-        pad={{horizontal: 'medium'}}
-        style={{
-          maxWidth: 704,
-          width: '100%',
-        }}>
+      <PostBox>
         <Box
-          style={{maxWidth: 704, width: '100%'}}
-          pad={{top: 'medium', horizontal: 'medium'}}
+          direction="row"
+          align="baseline"
+          justify="between"
+          pad={{horizontal: 'medium', bottom: 'medium'}}
+          wrap={true}
           border={{
             size: 'xsmall',
             side: 'bottom',
             color: 'rgba(0,0,0,0.1)',
           }}>
-          <Heading style={{marginTop: 0}} level={1}>
+          <Heading style={{margin: 0}} level={2}>
             <Link href="/">
               <a
                 style={
@@ -46,8 +44,12 @@ function Header({gitHub, adminLinks}) {
               </a>
             </Link>
           </Heading>
+
+          <a href="https://onegraph.com">
+            <Text size="small">Learn more about OneGraph</Text>
+          </a>
         </Box>
-      </Box>
+      </PostBox>
     </>
   );
 }
