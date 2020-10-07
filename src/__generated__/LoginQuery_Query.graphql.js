@@ -200,11 +200,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "LoginQuery_Query",
-<<<<<<< HEAD
-    "id": "1d6852ad-21c2-44d4-a486-3d26a4a5986d",
-=======
-    "id": "a611f984-edc5-4334-92a5-a959718f7493",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "0d37ce5f-f9ce-4867-963b-f4f58307b4b5",
     "text": null,
     "metadata": {}
   }

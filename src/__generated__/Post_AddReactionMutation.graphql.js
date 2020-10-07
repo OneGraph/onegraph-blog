@@ -661,11 +661,7 @@ return {
   "params": {
     "operationKind": "mutation",
     "name": "Post_AddReactionMutation",
-<<<<<<< HEAD
-    "id": "fc59eaeb-535c-4e0a-9a20-cfc1ae54c04e",
-=======
-    "id": "730c02f2-486f-4e14-98c8-710cdb812a14",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "bf69612c-d309-4bad-845c-fdb381dfaddb",
     "text": null,
     "metadata": {}
   }

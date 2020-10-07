@@ -627,11 +627,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "RssFeed_Query",
-<<<<<<< HEAD
-    "id": "2a296999-b002-487a-adb7-c899ed8055b3",
-=======
-    "id": "8fab7061-80e5-494a-ab17-893a638c0b74",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "e5cbaf75-1ccc-4a1f-af4f-773f7d8de3f4",
     "text": null,
     "metadata": {}
   }

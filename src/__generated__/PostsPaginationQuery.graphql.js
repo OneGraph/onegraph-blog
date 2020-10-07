@@ -624,11 +624,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "PostsPaginationQuery",
-<<<<<<< HEAD
-    "id": "3a1755e7-eebb-4502-9491-f49c6a47ad38",
-=======
-    "id": "1ccdaa3b-b651-4510-971a-9621ef6f1a56",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "444b18e5-3def-4bc7-8525-05eae0c31cbc",
     "text": null,
     "metadata": {}
   }

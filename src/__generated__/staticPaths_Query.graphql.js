@@ -270,11 +270,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "staticPaths_Query",
-<<<<<<< HEAD
-    "id": "79f04c74-4e6f-48ce-89f2-a9f15e5964b3",
-=======
-    "id": "7a7e18a8-50ca-42b1-9385-19b18833325d",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "63e181f2-8730-40a3-837b-a05313027f03",
     "text": null,
     "metadata": {}
   }

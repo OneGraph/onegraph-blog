@@ -632,11 +632,7 @@ return {
   "params": {
     "operationKind": "query",
     "name": "PostsRoot_Query",
-<<<<<<< HEAD
-    "id": "3bccc6b7-cbfe-4372-a9b3-01ee28c452d1",
-=======
-    "id": "7331c192-2a17-4e25-88a4-ff03f7724bef",
->>>>>>> 0bd9760... s/changelog/blog
+    "id": "9f56a0a4-cc6d-4cf7-b490-064d183a011c",
     "text": null,
     "metadata": {}
   }
