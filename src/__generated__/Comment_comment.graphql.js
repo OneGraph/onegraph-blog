@@ -18,19 +18,21 @@ export type Comment_comment = {|
   +createdViaEmail: boolean,
   +author: ?{|
     +name?: ?string,
-    +avatarUrl?: string,
+    +avatarUrl?: any,
     +login?: string,
-    +url?: string,
+    +url?: any,
     +id?: string,
   |},
-  +createdAt: string,
+  +createdAt: any,
   +reactionGroups: ?$ReadOnlyArray<{|
     +content: GitHubReactionContent,
     +viewerHasReacted: boolean,
     +users: {|
       +totalCount: number,
       +nodes: ?$ReadOnlyArray<?{|
-        +login: string
+        +login: string,
+        +name: ?string,
+        +isViewer: boolean,
       |}>,
     |},
   |}>,
@@ -40,6 +42,7 @@ export type Comment_comment$data = Comment_comment;
 export type Comment_comment$key = {
   +$data?: Comment_comment$data,
   +$fragmentRefs: Comment_comment$ref,
+  ...
 };
 */
 
@@ -55,35 +58,42 @@ var v0 = {
 v1 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "avatarUrl",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
 v2 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "avatarUrl",
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "size",
+      "value": 96
+    }
+  ],
+  "storageKey": "avatarUrl(size:96)"
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "login",
   "args": null,
   "storageKey": null
 },
-v3 = {
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "url",
   "args": null,
   "storageKey": null
 },
-v4 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  },
+v5 = [
   (v1/*: any*/),
   (v2/*: any*/),
-  (v3/*: any*/)
+  (v3/*: any*/),
+  (v4/*: any*/)
 ];
 return {
   "kind": "Fragment",
@@ -95,8 +105,8 @@ return {
     (v0/*: any*/),
     {
       "kind": "ScalarField",
-      "alias": null,
-      "name": "body",
+      "alias": "body",
+      "name": "__body_registerMarkdown",
       "args": null,
       "storageKey": null
     },
@@ -119,29 +129,29 @@ return {
         {
           "kind": "InlineFragment",
           "type": "GitHubUser",
-          "selections": (v4/*: any*/)
+          "selections": (v5/*: any*/)
         },
         {
           "kind": "InlineFragment",
           "type": "GitHubBot",
           "selections": [
-            (v1/*: any*/),
             (v2/*: any*/),
-            (v3/*: any*/)
+            (v3/*: any*/),
+            (v4/*: any*/)
           ]
         },
         {
           "kind": "InlineFragment",
           "type": "GitHubOrganization",
-          "selections": (v4/*: any*/)
+          "selections": (v5/*: any*/)
         },
         {
           "kind": "InlineFragment",
           "type": "GitHubMannequin",
           "selections": [
             (v0/*: any*/),
-            (v2/*: any*/),
-            (v3/*: any*/)
+            (v3/*: any*/),
+            (v4/*: any*/)
           ]
         }
       ]
@@ -207,7 +217,15 @@ return {
               "concreteType": "GitHubUser",
               "plural": true,
               "selections": [
-                (v2/*: any*/)
+                (v3/*: any*/),
+                (v1/*: any*/),
+                {
+                  "kind": "ScalarField",
+                  "alias": null,
+                  "name": "isViewer",
+                  "args": null,
+                  "storageKey": null
+                }
               ]
             }
           ]
@@ -218,5 +236,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1ee5f7e5a343f2b58e4b6e73c3d6a129';
+(node/*: any*/).hash = 'bf1c01d5c104290607a0ec5d7a75420e';
 module.exports = node;

@@ -1,15 +1,12 @@
 // @flow
 
 import React from 'react';
-import './gifplayer.css';
+import imageUrl from './imageUrl';
+import base64Encode from './base64Encode';
 
 export default function GifPlayer({src: origSrc, ...props}: {src: string}) {
   const [playing, setPlaying] = React.useState(false);
-  const src = playing
-    ? origSrc
-    : `https://us-central1-onechangelog.cloudfunctions.net/gif-proxy?firstFrame=true&url=${encodeURIComponent(
-        origSrc,
-      )}`;
+  const src = imageUrl({src: origSrc, firstFrame: !playing});
 
   return (
     <span

@@ -1,4 +1,4 @@
 {
-  "plugins": ["macros", "babel-plugin-idx"],
-  "presets": ["razzle/babel", "@babel/preset-flow"]
+  "plugins": ["macros", "@babel/plugin-proposal-optional-chaining"],
+  "presets": ["next/babel", "@babel/preset-flow"]
 }

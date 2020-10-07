@@ -20,7 +20,10 @@ function runIntrospectionQuery() {
       {
         hostname: 'serve.onegraph.com',
         port: 443,
-        path: '/graphql?app_id=' + process.env.RAZZLE_ONEGRAPH_APP_ID,
+        path:
+          '/graphql?app_id=' +
+          (process.env.NEXT_PUBLIC_ONEGRAPH_APP_ID ||
+            process.env.RAZZLE_ONEGRAPH_APP_ID),
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,6 +68,8 @@ const persistQueryConfigDirective = `
     fixedVariables: PersistedQueryFixedVariablesConfiguration
     "List of variables that the user can provide"
     freeVariables: [String!]
+    "Number of seconds to cache the results of the query"
+    cacheSeconds: Float
   ) on QUERY | MUTATION | SUBSCRIPTION
 `;
 

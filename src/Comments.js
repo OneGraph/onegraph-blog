@@ -5,25 +5,30 @@ import graphql from 'babel-plugin-relay/macro';
 import {
   commitMutation,
   createPaginationContainer,
-  type RelayProp,
+  type RelayPaginationProp,
 } from 'react-relay';
+import {useRelayEnvironment} from 'react-relay/hooks';
 import {ConnectionHandler} from 'relay-runtime';
-import {PostBox, ReactionBar} from './Post';
+import {PostBox} from './Post';
 import type {Comments_post} from './__generated__/Comments_post.graphql';
-import LoadingSpinner from './loadingSpinner';
 import MarkdownRenderer from './MarkdownRenderer';
-import idx from 'idx';
-import {Box, Heading, Text, TextArea, Tabs, Tab, Button, Stack} from 'grommet';
-import {formatDistance, format} from 'date-fns';
+import {Box} from 'grommet/components/Box';
+import {Text} from 'grommet/components/Text';
+import {TextArea} from 'grommet/components/TextArea';
+import {Tabs} from 'grommet/components/Tabs';
+import {Tab} from 'grommet/components/Tab';
+import {Button} from 'grommet/components/Button';
+import {Stack} from 'grommet/components/Stack';
 import Comment from './Comment';
 import {NotificationContext} from './Notifications';
 import UserContext from './UserContext';
 import GitHubLoginButton from './GitHubLoginButton';
 
 type Props = {
-  relay: RelayProp,
+  relay: RelayPaginationProp,
   post: Comments_post,
   postId: string,
+  viewer: {+login: string, +name: ?string, +avatarUrl: string, +url: string},
 };
 
 // n.b. no accessToken in the persistedQueryConfiguration for this mutation,
@@ -31,7 +36,7 @@ type Props = {
 // persisted auth
 const addCommentMutation = graphql`
   mutation Comments_AddCommentMutation($input: GitHubAddCommentInput!)
-    @persistedQueryConfiguration(freeVariables: ["input"]) {
+  @persistedQueryConfiguration(freeVariables: ["input"]) {
     gitHub {
       addComment(input: $input) {
         commentEdge {
@@ -44,23 +49,62 @@ const addCommentMutation = graphql`
   }
 `;
 
-function Comments({post, relay, postId}: Props) {
+let tempId = 0;
+
+function CommentInput({
+  postId,
+  viewer,
+}: {
+  postId: string,
+  viewer: {+login: string, +name: ?string, +avatarUrl: string, +url: string},
+}) {
+  const environment = useRelayEnvironment();
   const {error: notifyError} = React.useContext(NotificationContext);
-  const {isLoggedIn, login} = React.useContext(UserContext);
+  const {loginStatus, login} = React.useContext(UserContext);
+
+  const isLoggedIn = loginStatus === 'logged-in';
 
   const [comment, setComment] = React.useState('');
   const [saving, setSaving] = React.useState(false);
 
-  const comments = [];
-  for (const edge of post.comments.edges || []) {
-    if (edge && edge.node) {
-      comments.push(edge.node);
-    }
-  }
+  const onInputChange = React.useCallback(
+    (e) => {
+      setComment(e.target.value);
+    },
+    [setComment],
+  );
 
   const saveComment = () => {
     setSaving(true);
-    commitMutation(relay.environment, {
+    const updater = (store, data) => {
+      const newComment = store.get(
+        data.gitHub.addComment.commentEdge.node.__id,
+      );
+      const post = store.get(postId);
+      if (newComment && post) {
+        const comments = ConnectionHandler.getConnection(
+          post,
+          'Comments_post_comments',
+        );
+        if (comments) {
+          const edge = ConnectionHandler.createEdge(
+            store,
+            comments,
+            newComment,
+            'GitHubIssueComment',
+          );
+          ConnectionHandler.insertEdgeAfter(comments, edge);
+        }
+        const count = post.getLinkedRecord('comments')?.getValue('totalCount');
+        if (Number.isInteger(count)) {
+          // $FlowFixMe: count has been checked by isInteger
+          const newCount = count + 1;          
+          // eslint-disable-next-line no-unused-expressions
+          post.getLinkedRecord('comments')?.setValue(newCount, 'totalCount');
+        }
+      }
+    };
+    commitMutation(environment, {
       mutation: addCommentMutation,
       variables: {
         input: {
@@ -72,84 +116,103 @@ function Comments({post, relay, postId}: Props) {
         setSaving(false);
         setComment('');
       },
-      onError: err => notifyError('Error saving comment. Please try again.'),
-      updater(store, data) {
-        const newComment = store.get(
-          data.gitHub.addComment.commentEdge.node.__id,
-        );
-        const post = store.get(postId);
-        const ch = ConnectionHandler;
-        const comments = ConnectionHandler.getConnection(
-          post,
-          'Comments_post_comments',
-        );
-        const edge = ConnectionHandler.createEdge(
-          store,
-          comments,
-          newComment,
-          'GitHubIssueComment',
-        );
-        ConnectionHandler.insertEdgeAfter(comments, edge);
+      onError: (err) => {
+        console.error('Error saving commeent', err);
+        notifyError('Error saving comment. Please try again.');
+        setSaving(false);
       },
+      optimisticResponse: {
+        gitHub: {
+          addComment: {
+            commentEdge: {
+              node: {
+                id: `client:newComment:${tempId++}`,
+                body: comment,
+                createdViaEmail: false,
+                author: {
+                  __typename: 'GitHubUser',
+                  name: viewer.name,
+                  avatarUrl: viewer.avatarUrl,
+                  login: viewer.login,
+                  url: viewer.url,
+                },
+                createdAt: new Date().toString(),
+                reactionGroups: [],
+              },
+            },
+          },
+        },
+      },
+      optimisticUpdater: updater,
+      updater: updater,
     });
   };
 
   return (
-    <Box id="comments">
-      {comments.map(comment => {
-        return <Comment key={comment.id} comment={comment} />;
-      })}
-      <PostBox>
-        <Stack
-          guidingChild="first"
-          interactiveChild={isLoggedIn ? 'first' : 'last'}
-          anchor="center">
-          <Box style={{opacity: isLoggedIn ? 1 : 0.3}}>
+    <PostBox>
+      <Stack
+        guidingChild="first"
+        interactiveChild={isLoggedIn ? 'first' : 'last'}
+        anchor="center">
+        <Box style={{opacity: isLoggedIn ? 1 : 0.3}}>
+          <Box height={{min: 'small'}}>
             <Tabs justify="start">
               <Tab title={<Text size="small">Write</Text>}>
                 <Box pad="small" height="small">
                   <TextArea
+                    focusIndicator={false}
                     disabled={saving}
                     placeholder="Leave a comment (supports markdown)"
                     value={comment}
                     style={{height: '100%', fontWeight: 'normal'}}
-                    onChange={e => setComment(e.target.value)}
+                    onChange={onInputChange}
                   />
                 </Box>
               </Tab>
               <Tab title={<Text size="small">Preview</Text>}>
                 <Box pad="small" height={{min: 'small'}}>
                   <MarkdownRenderer
-                    escapeHtml={true}
+                    trustedInput={false}
                     source={comment.trim() ? comment : 'Nothing to preview.'}
                   />
                 </Box>
               </Tab>
             </Tabs>
-            <Box
-              border={{
-                size: 'xsmall',
-                side: 'bottom',
-                color: 'rgba(0,0,0,0.1)',
-              }}>
-              <Box pad="small" align="end">
-                <Button
-                  fill={false}
-                  label="Comment"
-                  onClick={saveComment}
-                  disabled={saving}
-                />
-              </Box>
+          </Box>
+          <Box>
+            <Box pad="small" align="end">
+              <Button
+                fill={false}
+                label="Comment"
+                onClick={saveComment}
+                disabled={saving}
+              />
             </Box>
           </Box>
+        </Box>
+        <Box style={{visibility: isLoggedIn ? 'hidden' : 'visible'}}>
+          <GitHubLoginButton onClick={login} label="Log in with GitHub" />
+        </Box>
+      </Stack>
+    </PostBox>
+  );
+}
 
-          <Box style={{visibility: isLoggedIn ? 'hidden' : 'visible'}}>
-            <GitHubLoginButton onClick={login} label="Log in with GitHub" />
-          </Box>
-        </Stack>
-      </PostBox>
+function Comments({post, relay, postId, viewer}: Props) {
+  const comments = [];
+  for (const edge of post.comments.edges || []) {
+    if (edge && edge.node) {
+      comments.push(edge.node);
+    }
+  }
 
-      <Box height="small" />
+  return (
+    <Box id="comments">
+      {comments.map((comment) => {
+        return <Comment key={comment.id} comment={comment} />;
+      })}
+      <CommentInput viewer={viewer} postId={postId} />
+      <Box height="xsmall" />
     </Box>
   );
 }
@@ -159,10 +222,10 @@ export default createPaginationContainer(
   {
     post: graphql`
       fragment Comments_post on GitHubIssue
-        @argumentDefinitions(
-          count: {type: "Int", defaultValue: 100}
-          cursor: {type: "String"}
-        ) {
+      @argumentDefinitions(
+        count: {type: "Int", defaultValue: 100}
+        cursor: {type: "String"}
+      ) {
         comments(first: $count, after: $cursor)
           @connection(key: "Comments_post_comments") {
           edges {
@@ -197,11 +260,12 @@ export default createPaginationContainer(
         $repoName: String!
         $repoOwner: String!
       )
-        @persistedQueryConfiguration(
-          accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}
-          freeVariables: ["count", "cursor", "issueNumber"]
-          fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}
-        ) {
+      @persistedQueryConfiguration(
+        accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}
+        freeVariables: ["count", "cursor", "issueNumber"]
+        fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}
+        cacheSeconds: 300
+      ) {
         gitHub {
           repository(name: $repoName, owner: $repoOwner) {
             __typename

@@ -14,12 +14,13 @@ declare export opaque type Posts_repository$ref: FragmentReference;
 declare export opaque type Posts_repository$fragmentType: Posts_repository$ref;
 export type Posts_repository = {|
   +issues: {|
+    +isClientFetched: ?boolean,
     +edges: ?$ReadOnlyArray<?{|
       +node: ?{|
         +id: string,
         +$fragmentRefs: Post_post$ref,
       |}
-    |}>
+    |}>,
   |},
   +$refType: Posts_repository$ref,
 |};
@@ -27,6 +28,7 @@ export type Posts_repository$data = Posts_repository;
 export type Posts_repository$key = {
   +$data?: Posts_repository$data,
   +$fragmentRefs: Posts_repository$ref,
+  ...
 };
 */
 
@@ -166,11 +168,23 @@ const node/*: ReaderFragment*/ = {
               "storageKey": null
             }
           ]
+        },
+        {
+          "kind": "ClientExtension",
+          "selections": [
+            {
+              "kind": "ScalarField",
+              "alias": "isClientFetched",
+              "name": "__isClientFetched_isClientFetched",
+              "args": null,
+              "storageKey": null
+            }
+          ]
         }
       ]
     }
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '860e2f92953cab35d8e06b5c493cca24';
+(node/*: any*/).hash = '7949b546f002563d6f82ac9fab4bf7a1';
 module.exports = node;

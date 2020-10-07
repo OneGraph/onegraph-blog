@@ -17,15 +17,17 @@ export type Post_post = {|
   +number: number,
   +title: string,
   +body: string,
-  +createdAt: string,
-  +updatedAt: string,
+  +createdAt: any,
+  +updatedAt: any,
   +assignees: {|
     +nodes: ?$ReadOnlyArray<?{|
       +id: string,
       +name: ?string,
       +login: string,
-      +avatarUrl: string,
-      +url: string,
+      +avatarUrl: any,
+      +url: any,
+      +twitterUsername: ?string,
+      +websiteUrl: ?any,
     |}>
   |},
   +reactionGroups: ?$ReadOnlyArray<{|
@@ -34,7 +36,9 @@ export type Post_post = {|
     +users: {|
       +totalCount: number,
       +nodes: ?$ReadOnlyArray<?{|
-        +login: string
+        +login: string,
+        +name: ?string,
+        +isViewer: boolean,
       |}>,
     |},
   |}>,
@@ -45,7 +49,7 @@ export type Post_post = {|
     +name: string,
     +owner: {|
       +login: string,
-      +avatarUrl: string,
+      +avatarUrl: any,
     |},
   |},
   +$refType: Post_post$ref,
@@ -54,6 +58,7 @@ export type Post_post$data = Post_post;
 export type Post_post$key = {
   +$data?: Post_post$data,
   +$fragmentRefs: Post_post$ref,
+  ...
 };
 */
 
@@ -81,6 +86,19 @@ v2 = {
   "storageKey": null
 },
 v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "avatarUrl",
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "size",
+      "value": 96
+    }
+  ],
+  "storageKey": "avatarUrl(size:96)"
+},
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "totalCount",
@@ -111,8 +129,8 @@ return {
     },
     {
       "kind": "ScalarField",
-      "alias": null,
-      "name": "body",
+      "alias": "body",
+      "name": "__body_registerMarkdown",
       "args": null,
       "storageKey": null
     },
@@ -157,17 +175,25 @@ return {
             (v0/*: any*/),
             (v1/*: any*/),
             (v2/*: any*/),
+            (v3/*: any*/),
             {
               "kind": "ScalarField",
               "alias": null,
-              "name": "avatarUrl",
+              "name": "url",
               "args": null,
               "storageKey": null
             },
             {
               "kind": "ScalarField",
               "alias": null,
-              "name": "url",
+              "name": "twitterUsername",
+              "args": null,
+              "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "websiteUrl",
               "args": null,
               "storageKey": null
             }
@@ -213,7 +239,7 @@ return {
           "concreteType": "GitHubReactingUserConnection",
           "plural": false,
           "selections": [
-            (v3/*: any*/),
+            (v4/*: any*/),
             {
               "kind": "LinkedField",
               "alias": null,
@@ -223,7 +249,15 @@ return {
               "concreteType": "GitHubUser",
               "plural": true,
               "selections": [
-                (v2/*: any*/)
+                (v2/*: any*/),
+                (v1/*: any*/),
+                {
+                  "kind": "ScalarField",
+                  "alias": null,
+                  "name": "isViewer",
+                  "args": null,
+                  "storageKey": null
+                }
               ]
             }
           ]
@@ -239,7 +273,7 @@ return {
       "concreteType": "GitHubIssueCommentConnection",
       "plural": false,
       "selections": [
-        (v3/*: any*/)
+        (v4/*: any*/)
       ]
     },
     {
@@ -262,19 +296,7 @@ return {
           "plural": false,
           "selections": [
             (v2/*: any*/),
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "avatarUrl",
-              "args": [
-                {
-                  "kind": "Literal",
-                  "name": "size",
-                  "value": 192
-                }
-              ],
-              "storageKey": "avatarUrl(size:192)"
-            }
+            (v3/*: any*/)
           ]
         }
       ]
@@ -283,5 +305,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'aa420761ef3f719df2d4bb187608e494';
+(node/*: any*/).hash = 'd50f84fee1ef98dbb54498b0a028f110';
 module.exports = node;

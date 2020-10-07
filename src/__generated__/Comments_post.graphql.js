@@ -27,6 +27,7 @@ export type Comments_post$data = Comments_post;
 export type Comments_post$key = {
   +$data?: Comments_post$data,
   +$fragmentRefs: Comments_post$ref,
+  ...
 };
 */
 

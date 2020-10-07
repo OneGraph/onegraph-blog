@@ -2,8 +2,16 @@
 
 import React from 'react';
 
-const UserContext = React.createContext<*>({
-  isLoggedIn: false,
+export type LoginStatus = 'checking' | 'logged-in' | 'logged-out' | 'error';
+
+export type UserContextType = {
+  loginStatus: LoginStatus,
+  login: () => void,
+  logout: () => void,
+};
+
+const UserContext = React.createContext<UserContextType>({
+  loginStatus: 'checking',
   login: () => undefined,
   logout: () => undefined,
 });

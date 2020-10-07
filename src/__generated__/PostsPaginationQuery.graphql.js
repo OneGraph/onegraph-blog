@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a42fb5529c1e66cc99890a33a603c99a
+ * @relayHash 5066b95f4d02e83ba846e87ece7987b6
  */
 
 /* eslint-disable */
@@ -13,8 +13,8 @@ type Posts_repository$ref = any;
 export type GitHubIssueOrderField = "COMMENTS" | "CREATED_AT" | "UPDATED_AT" | "%future added value";
 export type GitHubOrderDirection = "ASC" | "DESC" | "%future added value";
 export type GitHubIssueOrder = {|
-  direction: GitHubOrderDirection,
   field: GitHubIssueOrderField,
+  direction: GitHubOrderDirection,
 |};
 export type PostsPaginationQueryVariables = {|
   count: number,
@@ -45,13 +45,59 @@ query PostsPaginationQuery(
   $orderBy: GitHubIssueOrder
   $repoOwner: String!
   $repoName: String!
-) @persistedQueryConfiguration(accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}, freeVariables: ["count", "cursor", "orderBy"], fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}) {
+) @persistedQueryConfiguration(accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}, freeVariables: ["count", "cursor", "orderBy"], fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}, cacheSeconds: 300) {
   gitHub {
     repository(name: $repoName, owner: $repoOwner) {
       __typename
       ...Posts_repository_32czeo
       id
     }
+  }
+}
+
+fragment Post_post on GitHubIssue {
+  id
+  number
+  title
+  body
+  createdAt
+  updatedAt
+  assignees(first: 10) {
+    nodes {
+      id
+      name
+      login
+      avatarUrl(size: 96)
+      url
+      twitterUsername
+      websiteUrl
+    }
+  }
+  reactionGroups {
+    content
+    viewerHasReacted
+    users(first: 11) {
+      totalCount
+      nodes {
+        login
+        name
+        isViewer
+        id
+      }
+    }
+  }
+  commentsCount: comments {
+    totalCount
+  }
+  repository {
+    name
+    owner {
+      __typename
+      login
+      avatarUrl(size: 96)
+      id
+    }
+    id
   }
 }
 
@@ -69,48 +115,6 @@ fragment Posts_repository_32czeo on GitHubRepository {
       endCursor
       hasNextPage
     }
-  }
-}
-
-fragment Post_post on GitHubIssue {
-  id
-  number
-  title
-  body
-  createdAt
-  updatedAt
-  assignees(first: 10) {
-    nodes {
-      id
-      name
-      login
-      avatarUrl
-      url
-    }
-  }
-  reactionGroups {
-    content
-    viewerHasReacted
-    users(first: 11) {
-      totalCount
-      nodes {
-        login
-        id
-      }
-    }
-  }
-  commentsCount: comments {
-    totalCount
-  }
-  repository {
-    name
-    owner {
-      __typename
-      login
-      avatarUrl(size: 192)
-      id
-    }
-    id
   }
 }
 */
@@ -215,6 +219,19 @@ v7 = {
   "storageKey": null
 },
 v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "avatarUrl",
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "size",
+      "value": 96
+    }
+  ],
+  "storageKey": "avatarUrl(size:96)"
+},
+v9 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "totalCount",
@@ -346,6 +363,15 @@ return {
                             "storageKey": null
                           },
                           {
+                            "kind": "ScalarHandle",
+                            "alias": null,
+                            "name": "body",
+                            "args": null,
+                            "handle": "registerMarkdown",
+                            "key": "",
+                            "filters": null
+                          },
+                          {
                             "kind": "ScalarField",
                             "alias": null,
                             "name": "createdAt",
@@ -386,17 +412,25 @@ return {
                                   (v5/*: any*/),
                                   (v6/*: any*/),
                                   (v7/*: any*/),
+                                  (v8/*: any*/),
                                   {
                                     "kind": "ScalarField",
                                     "alias": null,
-                                    "name": "avatarUrl",
+                                    "name": "url",
                                     "args": null,
                                     "storageKey": null
                                   },
                                   {
                                     "kind": "ScalarField",
                                     "alias": null,
-                                    "name": "url",
+                                    "name": "twitterUsername",
+                                    "args": null,
+                                    "storageKey": null
+                                  },
+                                  {
+                                    "kind": "ScalarField",
+                                    "alias": null,
+                                    "name": "websiteUrl",
                                     "args": null,
                                     "storageKey": null
                                   }
@@ -442,7 +476,7 @@ return {
                                 "concreteType": "GitHubReactingUserConnection",
                                 "plural": false,
                                 "selections": [
-                                  (v8/*: any*/),
+                                  (v9/*: any*/),
                                   {
                                     "kind": "LinkedField",
                                     "alias": null,
@@ -453,6 +487,14 @@ return {
                                     "plural": true,
                                     "selections": [
                                       (v7/*: any*/),
+                                      (v6/*: any*/),
+                                      {
+                                        "kind": "ScalarField",
+                                        "alias": null,
+                                        "name": "isViewer",
+                                        "args": null,
+                                        "storageKey": null
+                                      },
                                       (v5/*: any*/)
                                     ]
                                   }
@@ -469,7 +511,7 @@ return {
                             "concreteType": "GitHubIssueCommentConnection",
                             "plural": false,
                             "selections": [
-                              (v8/*: any*/)
+                              (v9/*: any*/)
                             ]
                           },
                           {
@@ -493,19 +535,7 @@ return {
                                 "selections": [
                                   (v2/*: any*/),
                                   (v7/*: any*/),
-                                  {
-                                    "kind": "ScalarField",
-                                    "alias": null,
-                                    "name": "avatarUrl",
-                                    "args": [
-                                      {
-                                        "kind": "Literal",
-                                        "name": "size",
-                                        "value": 192
-                                      }
-                                    ],
-                                    "storageKey": "avatarUrl(size:192)"
-                                  },
+                                  (v8/*: any*/),
                                   (v5/*: any*/)
                                 ]
                               },
@@ -548,6 +578,27 @@ return {
                         "storageKey": null
                       }
                     ]
+                  },
+                  {
+                    "kind": "ClientExtension",
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "isClientFetched",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarHandle",
+                        "alias": null,
+                        "name": "isClientFetched",
+                        "args": null,
+                        "handle": "isClientFetched",
+                        "key": "",
+                        "filters": null
+                      }
+                    ]
                   }
                 ]
               },
@@ -573,12 +624,12 @@ return {
   "params": {
     "operationKind": "query",
     "name": "PostsPaginationQuery",
-    "id": "99df7ec7-a065-4b68-aa1e-a891a10c62bf",
+    "id": "9ea561a1-8a0c-4c54-96a2-4f5c3e2c0734",
     "text": null,
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '5729094fcf4421ecce17c2fbccd6da7e';
+(node/*: any*/).hash = 'c128052767296794f9f42d6a89e75eab';
 module.exports = node;

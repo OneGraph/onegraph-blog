@@ -1,8 +1,32 @@
 const https = require('https');
+const path = require('path');
 const GraphQLLanguage = require('graphql/language');
 const {parse, print} = require('graphql');
 
 require('dotenv').config();
+require('dotenv').config({path: path.resolve(process.cwd(), '.env.local')});
+
+if (
+  (!process.env.REPOSITORY_FIXED_VARIABLES &&
+    // Backwards compat with older apps that started with razzle
+    process.env.RAZZLE_GITHUB_REPO_OWNER &&
+    process.env.RAZZLE_GITHUB_REPO_NAME) ||
+  (process.env.NEXT_PUBLIC_GITHUB_REPO_OWNER &&
+    process.env.NEXT_PUBLIC_GITHUB_REPO_NAME) ||
+  (process.env.VERCEL_GITHUB_ORG && process.env.VERCEL_GITHUB_REPO)
+) {
+  const repoName =
+    process.env['RAZZLE_GITHUB_REPO_NAME'] ||
+    process.env['NEXT_PUBLIC_GITHUB_REPO_NAME'] ||
+    process.env['VERCEL_GITHUB_REPO'];
+  const repoOwner =
+    process.env['RAZZLE_GITHUB_REPO_OWNER'] ||
+    process.env['NEXT_PUBLIC_GITHUB_REPO_OWNER'] ||
+    process.env['VERCEL_GITHUB_ORG'];
+  process.env[
+    'REPOSITORY_FIXED_VARIABLES'
+  ] = `{"repoName": "${repoName}", "repoOwner": "${repoOwner}"}`;
+}
 
 const PERSIST_QUERY_MUTATION = `
   mutation PersistQuery(
@@ -11,6 +35,7 @@ const PERSIST_QUERY_MUTATION = `
     $accessToken: String
     $query: String!
     $fixedVariables: JSON
+    $cacheStrategy: OneGraphPersistedQueryCacheStrategyArg
   ) {
     oneGraph {
       createPersistedQuery(
@@ -18,7 +43,7 @@ const PERSIST_QUERY_MUTATION = `
           query: $query
           accessToken: $accessToken
           appId: $appId
-          cacheStrategy: { timeToLiveSeconds: 300 }
+          cacheStrategy: $cacheStrategy
           freeVariables: $freeVariables
           fixedVariables: $fixedVariables
         }
@@ -37,24 +62,29 @@ async function persistQuery(queryText) {
   const freeVariables = new Set([]);
   let accessToken = null;
   let fixedVariables = null;
+  let cacheSeconds = null;
   let transformedAst = GraphQLLanguage.visit(ast, {
     OperationDefinition: {
       enter(node) {
         for (const directive of node.directives) {
           if (directive.name.value === 'persistedQueryConfiguration') {
             const accessTokenArg = directive.arguments.find(
-              a => a.name.value === 'accessToken',
+              (a) => a.name.value === 'accessToken',
             );
             const fixedVariablesArg = directive.arguments.find(
-              a => a.name.value === 'fixedVariables',
+              (a) => a.name.value === 'fixedVariables',
             );
             const freeVariablesArg = directive.arguments.find(
-              a => a.name.value === 'freeVariables',
+              (a) => a.name.value === 'freeVariables',
+            );
+
+            const cacheSecondsArg = directive.arguments.find(
+              (a) => a.name.value === 'cacheSeconds',
             );
 
             if (accessTokenArg) {
               const envArg = accessTokenArg.value.fields.find(
-                f => f.name.value === 'environmentVariable',
+                (f) => f.name.value === 'environmentVariable',
               );
               if (envArg) {
                 if (accessToken) {
@@ -77,7 +107,7 @@ async function persistQuery(queryText) {
 
             if (fixedVariablesArg) {
               const envArg = fixedVariablesArg.value.fields.find(
-                f => f.name.value === 'environmentVariable',
+                (f) => f.name.value === 'environmentVariable',
               );
               if (envArg) {
                 if (fixedVariables) {
@@ -103,12 +133,16 @@ async function persistQuery(queryText) {
                 freeVariables.add(v.value);
               }
             }
+
+            if (cacheSecondsArg) {
+              cacheSeconds = parseFloat(cacheSecondsArg.value.value);
+            }
           }
         }
         return {
           ...node,
           directives: node.directives.filter(
-            d => d.name.value !== 'persistedQueryConfiguration',
+            (d) => d.name.value !== 'persistedQueryConfiguration',
           ),
         };
       },
@@ -118,10 +152,18 @@ async function persistQuery(queryText) {
   const variables = {
     query: print(transformedAst),
     // This is your app's app id, edit `/.env` to change it
-    appId: process.env.RAZZLE_ONEGRAPH_APP_ID,
+    appId:
+      process.env.NEXT_PUBLIC_ONEGRAPH_APP_ID ||
+      // Backwards compat with older apps that started with razzle
+      process.env.RAZZLE_ONEGRAPH_APP_ID,
     accessToken: accessToken || null,
     freeVariables: [...freeVariables],
     fixedVariables: fixedVariables,
+    cacheStrategy: cacheSeconds
+      ? {
+          timeToLiveSeconds: cacheSeconds,
+        }
+      : null,
   };
 
   const body = JSON.stringify({
@@ -134,10 +176,10 @@ async function persistQuery(queryText) {
       {
         hostname: 'serve.onegraph.com',
         port: 443,
-        // This is onedash's app id. If you followed the instructions in the
-        // README to create the `OG_DASHBOARD_ACCESS_TOKEN`, then this is the
-        // app id associated with the token that lets you persist queries.
-        // Don't change this to your app id.
+        // This is the app id for the OneGraph dashbaord. If you followed the
+        // instructions in the README to create the `OG_DASHBOARD_ACCESS_TOKEN`,
+        // then this is the app id associated with the token that lets you persist
+        //  queries. Don't change this to your app id.
         path: '/graphql?app_id=0b066ba6-ed39-4db8-a497-ba0be34d5b2a',
         method: 'POST',
         headers: {
@@ -146,8 +188,8 @@ async function persistQuery(queryText) {
           Authorization: 'Bearer ' + process.env.OG_DASHBOARD_ACCESS_TOKEN,
         },
       },
-      res => {
-        res.on('data', chunk => {
+      (res) => {
+        res.on('data', (chunk) => {
           data += chunk;
         });
         res.on('end', () => {

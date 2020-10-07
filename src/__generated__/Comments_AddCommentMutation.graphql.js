@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d0ee35b5e34664fd1c889b91e1f027f9
+ * @relayHash 4da47b371f82d624c643767f5c5fa81c
  */
 
 /* eslint-disable */
@@ -11,9 +11,9 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type Comment_comment$ref = any;
 export type GitHubAddCommentInput = {|
-  clientMutationId?: ?string,
-  body: string,
   subjectId: string,
+  body: string,
+  clientMutationId?: ?string,
 |};
 export type Comments_AddCommentMutationVariables = {|
   input: GitHubAddCommentInput
@@ -60,23 +60,20 @@ fragment Comment_comment on GitHubIssueComment {
     __typename
     ... on GitHubUser {
       name
-      avatarUrl
+      avatarUrl(size: 96)
       login
       url
-      id
     }
     ... on GitHubBot {
-      avatarUrl
+      avatarUrl(size: 96)
       login
       url
-      id
     }
     ... on GitHubOrganization {
       name
-      avatarUrl
+      avatarUrl(size: 96)
       login
       url
-      id
     }
     ... on GitHubMannequin {
       id
@@ -92,6 +89,8 @@ fragment Comment_comment on GitHubIssueComment {
       totalCount
       nodes {
         login
+        name
+        isViewer
         id
       }
     }
@@ -125,36 +124,42 @@ v2 = {
 v3 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "avatarUrl",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
 v4 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "avatarUrl",
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "size",
+      "value": 96
+    }
+  ],
+  "storageKey": "avatarUrl(size:96)"
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "login",
   "args": null,
   "storageKey": null
 },
-v5 = {
+v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "url",
   "args": null,
   "storageKey": null
 },
-v6 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  },
+v7 = [
   (v3/*: any*/),
   (v4/*: any*/),
   (v5/*: any*/),
-  (v2/*: any*/)
+  (v6/*: any*/)
 ];
 return {
   "kind": "Request",
@@ -266,6 +271,15 @@ return {
                         "storageKey": null
                       },
                       {
+                        "kind": "ScalarHandle",
+                        "alias": null,
+                        "name": "body",
+                        "args": null,
+                        "handle": "registerMarkdown",
+                        "key": "",
+                        "filters": null
+                      },
+                      {
                         "kind": "ScalarField",
                         "alias": null,
                         "name": "createdViaEmail",
@@ -291,30 +305,29 @@ return {
                           {
                             "kind": "InlineFragment",
                             "type": "GitHubUser",
-                            "selections": (v6/*: any*/)
+                            "selections": (v7/*: any*/)
                           },
                           {
                             "kind": "InlineFragment",
                             "type": "GitHubBot",
                             "selections": [
-                              (v3/*: any*/),
                               (v4/*: any*/),
                               (v5/*: any*/),
-                              (v2/*: any*/)
+                              (v6/*: any*/)
                             ]
                           },
                           {
                             "kind": "InlineFragment",
                             "type": "GitHubOrganization",
-                            "selections": (v6/*: any*/)
+                            "selections": (v7/*: any*/)
                           },
                           {
                             "kind": "InlineFragment",
                             "type": "GitHubMannequin",
                             "selections": [
                               (v2/*: any*/),
-                              (v4/*: any*/),
-                              (v5/*: any*/)
+                              (v5/*: any*/),
+                              (v6/*: any*/)
                             ]
                           }
                         ]
@@ -380,7 +393,15 @@ return {
                                 "concreteType": "GitHubUser",
                                 "plural": true,
                                 "selections": [
-                                  (v4/*: any*/),
+                                  (v5/*: any*/),
+                                  (v3/*: any*/),
+                                  {
+                                    "kind": "ScalarField",
+                                    "alias": null,
+                                    "name": "isViewer",
+                                    "args": null,
+                                    "storageKey": null
+                                  },
                                   (v2/*: any*/)
                                 ]
                               }
@@ -401,7 +422,7 @@ return {
   "params": {
     "operationKind": "mutation",
     "name": "Comments_AddCommentMutation",
-    "id": "769983ca-aeac-4545-97ac-2dcc412b8181",
+    "id": "a7d393ab-fd53-4b36-a352-c66a0458934f",
     "text": null,
     "metadata": {}
   }

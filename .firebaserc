@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "default": "onechangelog",
-    "prod": "onegraph-dashboard",
-    "staging": "oph-dashboard-staging"
-  }
-}

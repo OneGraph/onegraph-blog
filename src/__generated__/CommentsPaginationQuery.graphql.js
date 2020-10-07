@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash bc1d71e0daf673e98f2a66b118c4cc53
+ * @relayHash 313272add08d6a2a3cf2b62121583673
  */
 
 /* eslint-disable */
@@ -41,7 +41,7 @@ query CommentsPaginationQuery(
   $issueNumber: Int!
   $repoName: String!
   $repoOwner: String!
-) @persistedQueryConfiguration(accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}, freeVariables: ["count", "cursor", "issueNumber"], fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}) {
+) @persistedQueryConfiguration(accessToken: {environmentVariable: "OG_GITHUB_TOKEN"}, freeVariables: ["count", "cursor", "issueNumber"], fixedVariables: {environmentVariable: "REPOSITORY_FIXED_VARIABLES"}, cacheSeconds: 300) {
   gitHub {
     repository(name: $repoName, owner: $repoOwner) {
       __typename
@@ -50,6 +50,51 @@ query CommentsPaginationQuery(
         id
       }
       id
+    }
+  }
+}
+
+fragment Comment_comment on GitHubIssueComment {
+  id
+  body
+  createdViaEmail
+  author {
+    __typename
+    ... on GitHubUser {
+      name
+      avatarUrl(size: 96)
+      login
+      url
+    }
+    ... on GitHubBot {
+      avatarUrl(size: 96)
+      login
+      url
+    }
+    ... on GitHubOrganization {
+      name
+      avatarUrl(size: 96)
+      login
+      url
+    }
+    ... on GitHubMannequin {
+      id
+      login
+      url
+    }
+  }
+  createdAt
+  reactionGroups {
+    content
+    viewerHasReacted
+    users(first: 11) {
+      totalCount
+      nodes {
+        login
+        name
+        isViewer
+        id
+      }
     }
   }
 }
@@ -67,52 +112,6 @@ fragment Comments_post_1G22uz on GitHubIssue {
     pageInfo {
       endCursor
       hasNextPage
-    }
-  }
-}
-
-fragment Comment_comment on GitHubIssueComment {
-  id
-  body
-  createdViaEmail
-  author {
-    __typename
-    ... on GitHubUser {
-      name
-      avatarUrl
-      login
-      url
-      id
-    }
-    ... on GitHubBot {
-      avatarUrl
-      login
-      url
-      id
-    }
-    ... on GitHubOrganization {
-      name
-      avatarUrl
-      login
-      url
-      id
-    }
-    ... on GitHubMannequin {
-      id
-      login
-      url
-    }
-  }
-  createdAt
-  reactionGroups {
-    content
-    viewerHasReacted
-    users(first: 11) {
-      totalCount
-      nodes {
-        login
-        id
-      }
     }
   }
 }
@@ -199,36 +198,42 @@ v5 = {
 v6 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "avatarUrl",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
 v7 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "avatarUrl",
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "size",
+      "value": 96
+    }
+  ],
+  "storageKey": "avatarUrl(size:96)"
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "login",
   "args": null,
   "storageKey": null
 },
-v8 = {
+v9 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "url",
   "args": null,
   "storageKey": null
 },
-v9 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  },
+v10 = [
   (v6/*: any*/),
   (v7/*: any*/),
   (v8/*: any*/),
-  (v5/*: any*/)
+  (v9/*: any*/)
 ];
 return {
   "kind": "Request",
@@ -360,6 +365,15 @@ return {
                                 "storageKey": null
                               },
                               {
+                                "kind": "ScalarHandle",
+                                "alias": null,
+                                "name": "body",
+                                "args": null,
+                                "handle": "registerMarkdown",
+                                "key": "",
+                                "filters": null
+                              },
+                              {
                                 "kind": "ScalarField",
                                 "alias": null,
                                 "name": "createdViaEmail",
@@ -379,30 +393,29 @@ return {
                                   {
                                     "kind": "InlineFragment",
                                     "type": "GitHubUser",
-                                    "selections": (v9/*: any*/)
+                                    "selections": (v10/*: any*/)
                                   },
                                   {
                                     "kind": "InlineFragment",
                                     "type": "GitHubBot",
                                     "selections": [
-                                      (v6/*: any*/),
                                       (v7/*: any*/),
                                       (v8/*: any*/),
-                                      (v5/*: any*/)
+                                      (v9/*: any*/)
                                     ]
                                   },
                                   {
                                     "kind": "InlineFragment",
                                     "type": "GitHubOrganization",
-                                    "selections": (v9/*: any*/)
+                                    "selections": (v10/*: any*/)
                                   },
                                   {
                                     "kind": "InlineFragment",
                                     "type": "GitHubMannequin",
                                     "selections": [
                                       (v5/*: any*/),
-                                      (v7/*: any*/),
-                                      (v8/*: any*/)
+                                      (v8/*: any*/),
+                                      (v9/*: any*/)
                                     ]
                                   }
                                 ]
@@ -468,7 +481,15 @@ return {
                                         "concreteType": "GitHubUser",
                                         "plural": true,
                                         "selections": [
-                                          (v7/*: any*/),
+                                          (v8/*: any*/),
+                                          (v6/*: any*/),
+                                          {
+                                            "kind": "ScalarField",
+                                            "alias": null,
+                                            "name": "isViewer",
+                                            "args": null,
+                                            "storageKey": null
+                                          },
                                           (v5/*: any*/)
                                         ]
                                       }
@@ -537,12 +558,12 @@ return {
   "params": {
     "operationKind": "query",
     "name": "CommentsPaginationQuery",
-    "id": "298c6715-e528-4c94-925e-19014c623bda",
+    "id": "091fe1cc-8388-4b4b-ad02-4360c385dc80",
     "text": null,
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '0e9335722b2c22d7a2c06b16c1aef43b';
+(node/*: any*/).hash = '5b5e9b2d70b140e74df976fdf87a24e4';
 module.exports = node;
