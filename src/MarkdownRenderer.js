@@ -225,7 +225,7 @@ function Link(props) {
   return <Anchor {...props} />;
 }
 
-const defaultRenderers = () => {
+const defaultRenderers = ({isRss}: {isRss?: ?boolean}) => {
   const footnoteRefs = {};
   return {
     blockquote(props) {
@@ -288,6 +288,19 @@ const defaultRenderers = () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const ref = footnoteRefs[props.identifier] || React.useRef();
       footnoteRefs[props.identifier] = ref;
+      if (isRss) {
+        return (
+          <Box direction="row">
+            <sup
+              style={{
+                cursor: 'pointer',
+              }}>
+              {Object.keys(footnoteRefs).indexOf(props.identifier) + 1}
+            </sup>
+            {props.children}
+          </Box>
+        );
+      }
       return (
         <Tippy
           arrow={false}
@@ -338,7 +351,7 @@ export default class MarkdownRenderer extends React.PureComponent<Props> {
       <ReactMarkdown
         escapeHtml={this.props.trustedInput ? false : true}
         source={this.props.source}
-        renderers={defaultRenderers()}
+        renderers={defaultRenderers({isRss: false})}
         astPlugins={this.props.trustedInput ? [parseHtml] : []}
         parserOptions={{footnotes: true}}
       />
@@ -351,11 +364,12 @@ export class RssMarkdownRenderer extends React.PureComponent<Props> {
     const {trustedInput} = this.props;
     return (
       <ReactMarkdown
-        trustedInput={trustedInput}
+        escapeHtml={this.props.trustedInput ? false : true}
         astPlugins={trustedInput ? [parseHtml] : []}
+        parserOptions={{footnotes: true}}
         source={this.props.source}
         renderers={{
-          ...defaultRenderers(),
+          ...defaultRenderers({isRss: true}),
           image(props) {
             return <PlainImage isRss={true} {...props} />;
           },
