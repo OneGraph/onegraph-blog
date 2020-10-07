@@ -18,12 +18,19 @@ import {fetchTokenInfo, defaultThemeColors} from './lib/codeHighlight';
 import {isPromise} from 'relay-runtime';
 import Config from './config';
 import Tippy from '@tippyjs/react';
+import {slugify} from './Post';
 
 import type {TokenInfo} from './lib/codeHighlight';
+import type {StatelessFunctionalComponent, Node} from 'react';
 
 type Props = {|
   source: string,
   trustedInput: boolean,
+  addHeadingIds?: ?boolean,
+  HashLink?: StatelessFunctionalComponent<{
+    hash: string,
+    children?: Node,
+  }>,
 |};
 
 class CodeBlock extends React.PureComponent<
@@ -222,10 +229,37 @@ export function emojify(s: string): string {
 }
 
 function Link(props) {
+  const {HashLink} = props;
+  if (props.href && props.href.startsWith('#') && HashLink) {
+    return <HashLink hash={props.href}>{props.children}</HashLink>;
+  }
   return <Anchor {...props} />;
 }
 
-const defaultRenderers = ({isRss}: {isRss?: ?boolean}) => {
+function flatten(text, child) {
+  return typeof child === 'string'
+    ? text + child
+    : React.Children.toArray(child.props.children).reduce(flatten, text);
+}
+
+function headingSlug(props) {
+  const children = React.Children.toArray(props.children);
+  const text = children.reduce(flatten, '');
+  return slugify(text.toLowerCase());
+}
+
+const defaultRenderers = ({
+  isRss,
+  addHeadingIds,
+  HashLink,
+}: {
+  isRss?: ?boolean,
+  addHeadingIds?: ?boolean,
+  HashLink?: ?StatelessFunctionalComponent<{
+    hash: string,
+    children?: Node,
+  }>,
+}) => {
   const footnoteRefs = {};
   return {
     blockquote(props) {
@@ -260,11 +294,19 @@ const defaultRenderers = ({isRss}: {isRss?: ?boolean}) => {
     image: Image,
     paragraph: ParagraphWrapper,
     heading(props) {
-      return <Heading {...props} level={props.level + 1} />;
+      return (
+        <Heading
+          id={addHeadingIds ? headingSlug(props) : undefined}
+          {...props}
+          level={props.level + 1}
+        />
+      );
     },
-    link: Link,
+    link(props) {
+      return <Link {...props} HashLink={HashLink} />;
+    },
     linkReference(props) {
-      return <Anchor {...props} />;
+      return <div {...props} />;
     },
     footnoteReference: function FootnoteReference(props) {
       // This should be ok because we will always call these in the same order
@@ -351,7 +393,11 @@ export default class MarkdownRenderer extends React.PureComponent<Props> {
       <ReactMarkdown
         escapeHtml={this.props.trustedInput ? false : true}
         source={this.props.source}
-        renderers={defaultRenderers({isRss: false})}
+        renderers={defaultRenderers({
+          isRss: false,
+          addHeadingIds: this.props.addHeadingIds,
+          HashLink: this.props.HashLink,
+        })}
         astPlugins={this.props.trustedInput ? [parseHtml] : []}
         parserOptions={{footnotes: true}}
       />
@@ -375,7 +421,13 @@ export class RssMarkdownRenderer extends React.PureComponent<Props> {
           },
           heading(props) {
             const {level, ...restProps} = props;
-            return <Heading level={level + 2} {...restProps} />;
+            return (
+              <Heading
+                id={headingSlug(props)}
+                level={level + 2}
+                {...restProps}
+              />
+            );
           },
         }}
       />
