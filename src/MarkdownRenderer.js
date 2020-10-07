@@ -17,6 +17,7 @@ import emoji from './emoji';
 import {fetchTokenInfo, defaultThemeColors} from './lib/codeHighlight';
 import {isPromise} from 'relay-runtime';
 import Config from './config';
+import Tippy from '@tippyjs/react';
 
 import type {TokenInfo} from './lib/codeHighlight';
 
@@ -224,45 +225,89 @@ function Link(props) {
   return <Anchor {...props} />;
 }
 
-const defaultRenderers = {
-  blockquote(props) {
-    return (
-      <Text color="dark-3">
-        <blockquote {...props} />
-      </Text>
-    );
-  },
-  text(props) {
-    const text = props.children;
-    return emojify(text);
-  },
-  inlineCode(props) {
-    return (
-      <code
-        style={{
-          padding: '.2em .4em',
-          borderRadius: 6,
-          background: 'rgba(27,31,35,.05)',
-        }}>
-        {props.children}
-      </code>
-    );
-  },
-  code(props) {
-    if (props.language === 'backmatter') {
-      return null;
-    }
-    return <CodeBlock {...props} />;
-  },
-  image: Image,
-  paragraph: ParagraphWrapper,
-  heading(props) {
-    return <Heading {...props} level={props.level + 1} />;
-  },
-  link: Link,
-  linkReference(props) {
-    return <Anchor {...props} />;
-  },
+const defaultRenderers = () => {
+  const footnoteRefs = {};
+  return {
+    blockquote(props) {
+      return (
+        <Text color="dark-3">
+          <blockquote {...props} />
+        </Text>
+      );
+    },
+    text(props) {
+      const text = props.children;
+      return emojify(text);
+    },
+    inlineCode(props) {
+      return (
+        <code
+          style={{
+            padding: '.2em .4em',
+            borderRadius: 6,
+            background: 'rgba(27,31,35,.05)',
+          }}>
+          {props.children}
+        </code>
+      );
+    },
+    code(props) {
+      if (props.language === 'backmatter') {
+        return null;
+      }
+      return <CodeBlock {...props} />;
+    },
+    image: Image,
+    paragraph: ParagraphWrapper,
+    heading(props) {
+      return <Heading {...props} level={props.level + 1} />;
+    },
+    link: Link,
+    linkReference(props) {
+      return <Anchor {...props} />;
+    },
+    footnoteReference: function FootnoteReference(props) {
+      // This should be ok because we will always call these in the same order
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const ref = footnoteRefs[props.identifier] || React.useRef();
+      footnoteRefs[props.identifier] = ref;
+      return (
+        <sup
+          style={{
+            lineHeight: 0,
+            cursor: 'pointer',
+            fontSize: '0.8em',
+          }}
+          ref={ref}>
+          {Object.keys(footnoteRefs).indexOf(props.identifier) + 1}
+        </sup>
+      );
+    },
+    footnoteDefinition: function footnoteDefinition(props) {
+      // This should be ok because we will always call these in the same order
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const ref = footnoteRefs[props.identifier] || React.useRef();
+      footnoteRefs[props.identifier] = ref;
+      return (
+        <Tippy
+          arrow={false}
+          theme="light-border"
+          trigger="mouseenter focus click"
+          inertia={true}
+          interactive={true}
+          interactiveBorder={10}
+          duration={[75, 75]}
+          delay={500}
+          content={
+            <Box style={{transform: 'scale(0.8)'}}>
+              <Text size="small">{props.children}</Text>
+            </Box>
+          }
+          reference={ref}
+        />
+      );
+    },
+  };
 };
 
 const processNodeDefinitions = new HtmlToReact.ProcessNodeDefinitions(React);
@@ -293,8 +338,9 @@ export default class MarkdownRenderer extends React.PureComponent<Props> {
       <ReactMarkdown
         escapeHtml={this.props.trustedInput ? false : true}
         source={this.props.source}
-        renderers={defaultRenderers}
+        renderers={defaultRenderers()}
         astPlugins={this.props.trustedInput ? [parseHtml] : []}
+        parserOptions={{footnotes: true}}
       />
     );
   }
@@ -309,7 +355,7 @@ export class RssMarkdownRenderer extends React.PureComponent<Props> {
         astPlugins={trustedInput ? [parseHtml] : []}
         source={this.props.source}
         renderers={{
-          ...defaultRenderers,
+          ...defaultRenderers(),
           image(props) {
             return <PlainImage isRss={true} {...props} />;
           },
