@@ -3,18 +3,18 @@ steps:
     args: ['build',
            '--network=cloudbuild',
             '--build-arg', 'gcp_project=onegraph-dashboard',
-            '-t', 'gcr.io/onegraph-dashboard/changelog', '.']
+            '-t', 'gcr.io/onegraph-dashboard/blog', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/onegraph-dashboard/changelog']
+    args: ['push', 'gcr.io/onegraph-dashboard/blog']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args: ['run', 'deploy', 'changelog',
-           '--image', 'gcr.io/onegraph-dashboard/changelog',
+    args: ['run', 'deploy', 'blog',
+           '--image', 'gcr.io/onegraph-dashboard/blog',
            '--region', 'us-central1',
            '--platform', 'managed',
            '--concurrency', '80',
            '--max-instances', '100',
            '--timeout', '5m',
            '--memory', '512Mi']
-images: ['gcr.io/onegraph-dashboard/changelog']
+images: ['gcr.io/onegraph-dashboard/blog']
 timeout: '20m'
