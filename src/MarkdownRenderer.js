@@ -374,7 +374,6 @@ const defaultRenderers = ({
         />
       );
     },
-    link: Link,
     linkReference(props) {
       if (!props.href) {
         return <span>[{props.children}]</span>;
