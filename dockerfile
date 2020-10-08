@@ -6,7 +6,7 @@ ENV BASE_PATH="/blog"
 ENV NODE_ENV=production
 ARG gcp_project
 
-RUN yarn install --production
+RUN yarn install
 
 RUN yarn build && rm -rf .next/cache
 
@@ -26,7 +26,7 @@ COPY next.config.js .
 COPY .pnp.js .
 COPY .yarn/cache .yarn/cache
 
-RUN yarn install --production
+RUN yarn install
 
 COPY --from=builder .next .next
 
