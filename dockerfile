@@ -24,7 +24,8 @@ COPY .env.local .env
 COPY server.js.example server.js
 COPY next.config.js .
 COPY .pnp.js .
-COPY .yarn/ .yarn/
+COPY .yarn .
+COPY .yarnrc.yml .
 
 RUN yarn install
 
