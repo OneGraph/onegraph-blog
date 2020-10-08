@@ -10,11 +10,12 @@
     "gif-stream": "^1.1.0",
     "grommet": "2.15.0",
     "grommet-icons": "^4.4.0",
+    "html-to-react": "^1.4.4",
     "inline-css": "^2.5.1",
     "intersection-observer": "^0.11.0",
     "lower-case": "^2.0.1",
     "neuquant": "^1.0.2",
-    "next": "^9.5.2",
+    "next": "^9.5.4",
     "node-fetch": "^2.6.0",
     "onegraph-auth": "^3.0.0",
     "pixel-stream": "^1.0.3",
@@ -22,12 +23,16 @@
     "react-dom": "0.0.0-experimental-94c0244ba",
     "react-embed": "^3.3.2",
     "react-intersection-observer": "^8.28.5",
+    "react-is": "^16.13.1",
     "react-markdown": "^4.3.1",
     "react-relay": "0.0.0-experimental-183bdd28",
     "relay-runtime": "^10.0.1",
+    "remark-parse": "^8.0.3",
     "sentence-case": "^3.0.3",
     "sitemap": "^6.3.2",
-    "styled-components": "^5.0.0"
+    "styled-components": "^5.0.0",
+    "tippy.js": "^6.2.6",
+    "unified": "^9.2.0"
   },
   "resolutions": {
     "react": "0.0.0-experimental-94c0244ba",
@@ -50,7 +55,11 @@
     "extends": "react-app"
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
@@ -58,7 +67,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+    "@babel/core": "^7.11.6",
     "@babel/preset-flow": "^7.0.0",
     "babel-eslint": "10.x",
     "babel-plugin-macros": "^2.6.1",

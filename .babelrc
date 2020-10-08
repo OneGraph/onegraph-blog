@@ -1,4 +1,4 @@
 {
-  "plugins": ["macros", "@babel/plugin-proposal-optional-chaining"],
+  "plugins": ["macros"],
   "presets": ["next/babel", "@babel/preset-flow"]
 }
