@@ -28,6 +28,28 @@ if (
   ] = `{"repoName": "${repoName}", "repoOwner": "${repoOwner}"}`;
 }
 
+if (
+  (!process.env.REPOSITORY_FIXED_VARIABLES &&
+    // Backwards compat with older apps that started with razzle
+    (process.env.RAZZLE_GITHUB_REPO_OWNER &&
+      process.env.RAZZLE_GITHUB_REPO_NAME)) ||
+  (process.env.NEXT_PUBLIC_GITHUB_REPO_OWNER &&
+    process.env.NEXT_PUBLIC_GITHUB_REPO_NAME) ||
+  (process.env.VERCEL_GITHUB_ORG && process.env.VERCEL_GITHUB_REPO)
+) {
+  const repoName =
+    process.env['RAZZLE_GITHUB_REPO_NAME'] ||
+    process.env['NEXT_PUBLIC_GITHUB_REPO_NAME'] ||
+    process.env['VERCEL_GITHUB_REPO'];
+  const repoOwner =
+    process.env['RAZZLE_GITHUB_REPO_OWNER'] ||
+    process.env['NEXT_PUBLIC_GITHUB_REPO_OWNER'] ||
+    process.env['VERCEL_GITHUB_ORG'];
+  process.env[
+    'REPOSITORY_FIXED_VARIABLES'
+  ] = `{"repoName": "${repoName}", "repoOwner": "${repoOwner}"}`;
+}
+
 const PERSIST_QUERY_MUTATION = `
   mutation PersistQuery(
     $freeVariables: [String!]!
@@ -80,6 +102,10 @@ async function persistQuery(queryText) {
 
             const cacheSecondsArg = directive.arguments.find(
               (a) => a.name.value === 'cacheSeconds',
+            );
+
+            const cacheSecondsArg = directive.arguments.find(
+              a => a.name.value === 'cacheSeconds',
             );
 
             if (accessTokenArg) {
