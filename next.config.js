@@ -1,5 +1,6 @@
 module.exports = () => {
   const opts = {
+    poweredByHeader: false,
     basePath: process.env.BASE_PATH,
     env: {
       // Backwards compatibility for people migrating from RAZZLE
