@@ -3,7 +3,7 @@ FROM node:14 as builder
 COPY package.json .
 COPY yarn.lock .
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
