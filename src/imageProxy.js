@@ -163,27 +163,22 @@ export const proxyImage = (res: any, url: URL): any => {
           contentLength = parseInt(resp.headers[k], 10);
         }
       }
-      if (contentLength && contentLength >= 4500000) {
-        // Lambda can't handle anything larger than 5mb, so we'll redirect to the original url instead
-        redirect(res, url.toString());
-      } else {
-        res.status(resp.statusCode);
-        for (const k of Object.keys(resp.headers)) {
-          const lowerK = k.toLowerCase();
-          if (lowerK === 'content-type' || lowerK === 'content-length') {
-            res.set(k, resp.headers[k]);
-          }
+      res.status(resp.statusCode);
+      for (const k of Object.keys(resp.headers)) {
+        const lowerK = k.toLowerCase();
+        if (lowerK === 'content-type' || lowerK === 'content-length') {
+          res.set(k, resp.headers[k]);
         }
-        res.set('Cache-Control', 'public, max-age=2592000, s-maxage=2592000');
-        resp.on('data', (chunk) => {
-          res.write(chunk);
-        });
-
-        resp.on('end', () => {
-          res.end();
-          resolve();
-        });
       }
+      res.set('Cache-Control', 'public, max-age=2592000, s-maxage=2592000');
+      resp.on('data', (chunk) => {
+        res.write(chunk);
+      });
+
+      resp.on('end', () => {
+        res.end();
+        resolve();
+      });
     }).on('error', (err) => {
       res.send('Error');
       res.status(500);
